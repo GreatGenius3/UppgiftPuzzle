@@ -3,8 +3,10 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+// Klasen PuzzleDialog är en dialogruta som visar ett pusselspel
 public class PuzzleDialog extends JFrame implements ActionListener
 {
+    // Variabler
     private JPanel gamePanel;
     private JPanel progressPanel;
     private JPanel buttonPanel;
@@ -26,6 +28,7 @@ public class PuzzleDialog extends JFrame implements ActionListener
     private JLabel movesLabel;
     private JLabel secondsLabel;
 
+    // Konstruktor
     PuzzleDialog ()
     {
         puzzleRow = 4;
@@ -44,6 +47,8 @@ public class PuzzleDialog extends JFrame implements ActionListener
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
 
+    // Funktion som tar emot en ActionEvent
+    // Som tex knapptryck
     public void actionPerformed(ActionEvent e)
     {
 
