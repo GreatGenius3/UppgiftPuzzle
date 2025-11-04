@@ -95,11 +95,13 @@ public class GameLogic implements GameInt
         */
     }
 
+    // Blanda alla siffror i arrayen
     public void shuffle()
     {
 
     }
 
+    // inställningar
     public void settings()
     {
 
