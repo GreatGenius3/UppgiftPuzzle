@@ -101,7 +101,6 @@ public class GameLogic implements GameInt
 
     }
 
-    // inställningar
     public void settings()
     {
 
