@@ -28,6 +28,8 @@ public class PuzzleDialog extends JFrame implements ActionListener
 
     GameLogic gameLogic = new GameLogic();
 
+    private GameInt.BrickDirection movingDir;
+
     Color puzzelColor = new Color(125, 0, 0);
     Color customDarkGray = new Color(80, 80, 80);
     Color customLightGray = new Color(120, 120, 120);
@@ -77,16 +79,16 @@ public class PuzzleDialog extends JFrame implements ActionListener
         int fontSize = 26;
         newGameButton = new JButton("Nytt Spel");
         newGameButton.setFont(new Font("Arial", Font.BOLD, fontSize));
-        newGameButton.addActionListener(this);
+        newGameButton.addActionListener(e -> gameLogic.newGame(gameLogic.getPuzzleRow(), gameLogic.getPuzzleCells()));
         losningButton = new JButton("Lösning");
         losningButton.setFont(new Font("Arial", Font.BOLD, fontSize));
-        losningButton.addActionListener(this);
+        losningButton.addActionListener(e -> gameLogic.solve());
         aterstallButton = new JButton("Återställ");
         aterstallButton.setFont(new Font("Arial", Font.BOLD, fontSize));
-        aterstallButton.addActionListener(this);
+        aterstallButton.addActionListener(e -> gameLogic.reset());
         installningButton = new JButton("Inställningar");
         installningButton.setFont(new Font("Arial", Font.BOLD, fontSize));
-        installningButton.addActionListener(this);
+        // installningButton.addActionListener(this);
 
         buttonPanel.add(newGameButton);
         buttonPanel.add(losningButton);
@@ -122,10 +124,13 @@ public class PuzzleDialog extends JFrame implements ActionListener
 
         gamePanel.setBackground(customWhite);
 
+        movingDir = GameInt.BrickDirection.MOVE_UP;
+
         // Ornda upp antal knappar till spelfältet
         buttons = new JButton[gameLogic.getAmountOfPuzzles()];
         for (int i = 0; i < gameLogic.getAmountOfPuzzles(); i++)
         {
+            final int index = i;
             // puzzel[i] = i;
             buttons[i] = new JButton();
             buttons[i].setText(String.valueOf(i + 1));
@@ -143,7 +148,7 @@ public class PuzzleDialog extends JFrame implements ActionListener
 
             // buttons[i].setBorder(new EmptyBorder(10, 10, 10, 10));
             // buttons[i].setBounds(10, 10, 100, 100);
-            buttons[i].addActionListener(this);
+            buttons[i].addActionListener(e -> brickKnapp(index));
             gamePanel.add(buttons[i]);
         }
         // Sätt sen sista knappen till tom
@@ -157,17 +162,62 @@ public class PuzzleDialog extends JFrame implements ActionListener
         setVisible(true);
     }
 
-    public void KollaTomRuta(JButton one, JButton two)
+    public boolean isAdjacent(int index, int emptyIndex)
     {
-        String getBtnNumber = one.getText();
+        int row1 = index / gameLogic.getPuzzleCells();
+        int col1 = index % gameLogic.getPuzzleCells();
+        int row2 = emptyIndex / gameLogic.getPuzzleCells();
+        int col2 = emptyIndex % gameLogic.getPuzzleCells();
 
-        if (two.getText().isEmpty())
+        // Sätt nu variablen movingDir till
+        // den rikning som brickan ska flyttas till
+        if (row1 < row2)
+            movingDir = GameInt.BrickDirection.MOVE_DOWN;
+        else if (row1 > row2)
+            movingDir = GameInt.BrickDirection.MOVE_UP;
+        else if (col1 < col2)
+            movingDir = GameInt.BrickDirection.MOVE_RIGHT;
+        else
+            movingDir = GameInt.BrickDirection.MOVE_LEFT;
+
+        return (Math.abs(row1 - row2) == 1 && col1 == col2) ||
+               (Math.abs(col1 - col2) == 1 && row1 == row2);
+    }
+
+    // Här är funktionen som anropas när
+    // vi trycker på en bricka
+    public void brickKnapp(int index)
+    {
+        // Nu kolla vi om brickan vi trycker på
+        // är en bricka vi kan flytta på
+        if (isAdjacent(index, emptyIndex))
         {
-            two.setVisible(true);
-            two.setText(getBtnNumber);
+            // Sätt brickan vi trycker på till tom
+            buttons[index].setVisible(false);
+            buttons[index].setText("");
 
-            one.setText("");
-            one.setVisible(false);
+            // Sätt tom brickan till den vi tryckte på
+            buttons[emptyIndex].setVisible(true);
+            buttons[emptyIndex].setText(String.valueOf(index + 1));
+
+            // Uppdatera tom index
+            emptyIndex = index;
+
+            // Ta fram nya indexen från den rikting vi har rört oss på
+            int getNextIndex = gameLogic.findFromDirection(index, movingDir);
+            // Byt plats på brickorna
+            gameLogic.switchBricks(index, getNextIndex);
+
+            // Öka dragräknaren
+            gameLogic.incrementMoves();
+            movesLabel.setText(String.valueOf(gameLogic.getMoves()));
+
+            // Kolla om pusslet är löst
+            if (gameLogic.isSolved())
+            {
+                JOptionPane.showMessageDialog(this, "Grattis! Du löste pusslet på " +
+                    gameLogic.getMoves() + " drag!");
+            }
         }
     }
 
@@ -175,11 +225,6 @@ public class PuzzleDialog extends JFrame implements ActionListener
     // Som tex knapptryck
     public void actionPerformed(ActionEvent e)
     {
-        // Är det knapparna vi trycker på
-        Object getobj = e.getSource();
-        if (getobj instanceof JButton )
-        {
-            IO.println("button pressed");
-        }
+
     }
 }
