@@ -157,6 +157,12 @@ public class PuzzleDialog extends JFrame implements ActionListener
         setVisible(true);
     }
 
+    // Kolla efter en tom knapp
+    public void checkEmptyBtn(JButton one, JButton two)
+    {
+        String getBtnNumber = one.getText();
+    }
+
     // Funktion som tar emot en ActionEvent
     // Som tex knapptryck
     public void actionPerformed(ActionEvent e)
