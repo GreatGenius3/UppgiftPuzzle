@@ -157,10 +157,18 @@ public class PuzzleDialog extends JFrame implements ActionListener
         setVisible(true);
     }
 
-    // Kolla efter en tom knapp
-    public void checkEmptyBtn(JButton one, JButton two)
+    public void KollaTomRuta(JButton one, JButton two)
     {
         String getBtnNumber = one.getText();
+
+        if (two.getText().isEmpty())
+        {
+            two.setVisible(true);
+            two.setText(getBtnNumber);
+
+            one.setText("");
+            one.setVisible(false);
+        }
     }
 
     // Funktion som tar emot en ActionEvent
