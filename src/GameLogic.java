@@ -66,16 +66,19 @@ public class GameLogic implements GameInt
     // --------------------------------------------------------------
     // Metoder
     // --------------------------------------------------------------
+    // Skapar ett nytt spel med antal rader och celler
     public void newGame(int row, int cells)
     {
 
     }
 
+    // En metod som löser spelet
     public void solve()
     {
 
     }
 
+    // En metod som resetar spelet
     public void reset()
     {
         puzzel = new ArrayList<>();
