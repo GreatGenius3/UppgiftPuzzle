@@ -1,4 +1,4 @@
 void main()
 {
-    System.out.println("Hello World");
+    PuzzleDialog puzzleDialog = new PuzzleDialog();
 }
