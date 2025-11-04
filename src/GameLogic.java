@@ -75,7 +75,7 @@ public class GameLogic implements GameInt
     // En metod som löser spelet
     public void solve()
     {
-
+        IO.println("Please enter the number of puzzles: ");
     }
 
     // En metod som resetar spelet
