@@ -150,7 +150,9 @@ public class PuzzleDialog extends JFrame implements ActionListener
         // med 500 blandningar
         nyttSpel(500);
 
+        // Sätter detta fönster till fokus
         setFocusable(true);
+        // Därefter gör vi iordning tangentbordsbindningen
         setupKeyBindings();
 
         // Visa fönstret

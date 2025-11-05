@@ -2,6 +2,9 @@ import javax.swing.Timer;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+// Klassen GameTimer
+// Denna är en timer som används för att
+// räkna ut antal sekunder och minuter
 public class GameTimer
 {
     private Timer timer;
@@ -10,6 +13,8 @@ public class GameTimer
     private int minutes;
     private boolean isRunning;
 
+    // Vi skapar ett interface TimerListener
+    // Denna används för att signalera när timern startar, stoppas eller uppdateras
     public interface TimerListener
     {
         void onTimeUpdated(String time);
@@ -17,12 +22,15 @@ public class GameTimer
         void onTimerStopped();
     }
 
+    // Konstruktor
     GameTimer()
     {
         this.seconds = 0;
         this.minutes = 0;
         this.isRunning = false;
 
+        // Vi skapar en timer och anger en ActionListener
+        // som anropar funktionen tick() för varje 1000 millisekunder
         timer = new Timer(1000, new ActionListener()
         {
             @Override
@@ -33,11 +41,10 @@ public class GameTimer
         });
     }
 
-    public void setTimerListener(TimerListener listener)
-    {
-        this.timerListener = listener;
-    }
+    // Denna funktion sätter en TimerListener
+    public void setTimerListener(TimerListener listener) { this.timerListener = listener; }
 
+    // Starta timern
     public void start()
     {
         if (!isRunning)
@@ -51,6 +58,7 @@ public class GameTimer
         }
     }
 
+    // Stoppa timern
     public void stop()
     {
         if (isRunning)
@@ -64,6 +72,7 @@ public class GameTimer
         }
     }
 
+    // Återställ timern
     public void reset()
     {
         stop();
@@ -72,11 +81,14 @@ public class GameTimer
         updateListener();
     }
 
+    // Returnerar tiden i formatet mm:ss
     public String getTimeString()
     {
         return String.format("%02d:%02d", minutes, seconds);
     }
 
+    // Funktionen tick
+    // Denna anropas vid vald tid
     private void tick()
     {
         seconds++;
@@ -88,6 +100,7 @@ public class GameTimer
         updateListener();
     }
 
+    // Uppdaterar timerListener
     private void updateListener()
     {
         if (timerListener != null)
@@ -96,6 +109,7 @@ public class GameTimer
         }
     }
 
+    // Returnerar true om timern är igång
     public boolean isRunning()
     {
         return isRunning;
