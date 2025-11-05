@@ -3,6 +3,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
+// Klassen GameLogic implementerar GameInt
 public class GameLogic implements GameInt
 {
     // Variabler
@@ -27,7 +28,7 @@ public class GameLogic implements GameInt
         reset();
     }
     // --------------------------------------------------------------
-    // Geters
+    // Geters och setters
     // --------------------------------------------------------------
     public int getPuzzleRow()
     {
@@ -56,12 +57,21 @@ public class GameLogic implements GameInt
         return puzzel.get(index);
     }
 
+    public void setGameStatus(GameStatus newstatus) { gameStatus = newstatus; }
+
     // --------------------------------------------------------------
     // Metoder
     // --------------------------------------------------------------
+    // Sätt spelet till playning
+    public void startGame() { gameStatus = GameStatus.PLAYING; }
+    // Sätt spelet till pausad
+    public void pauseGame() { gameStatus = GameStatus.PAUSED; }
+    // Sätt spelet till pausad
+    public void finishGame() {gameStatus = GameStatus.PLAYING;}
+
     // Funktionen isAdjacent kollar om en bricka på vald index
     // är en bricka vi kan flytta på
-    public boolean isAdjacent(int index, int emptyIndex)
+    public boolean isAdjacent(int index)
     {
         int row1 = index / getPuzzleCells();
         int col1 = index % getPuzzleCells();
@@ -132,6 +142,8 @@ public class GameLogic implements GameInt
         int temp = puzzel.get(index1);
         puzzel.set(index1, puzzel.get(index2));
         puzzel.set(index2, temp);
+        if (puzzel.get(index1) == 0)
+            emptyIndex = index1;
     }
 
     // Skapar ett nytt spel med antal rader och celler
@@ -148,9 +160,11 @@ public class GameLogic implements GameInt
     }
 
     // En metod som löser spelet
-    public void solve()
+    // Kanske finns en algorithm för detta men
+    // jag kikar på det i framtiden
+    public void solve(int moves)
     {
-        IO.println("Tji fick ni! Inget quicklösning på detta! ");
+        // IO.println("Tji fick ni! Inget quicklösning på detta! ");
     }
 
     // Kollar om vi har löst detta
@@ -197,20 +211,20 @@ public class GameLogic implements GameInt
         }
     }
 
-    // Denna är en förbättra funktion som blandar
+    // Denna är en förbättrad funktion som blandar
     // siffror och ger ett lösbart pussel
-    public void shuffleSolveAble()
+    public void shuffleSolveAble(int shuffMoves)
     {
         // Se till först att vi har en lösning
         reset();
 
         // Gör 500 slumpade drag
         // Med hjälp av Random
-        int shuffleMoves = 500;
+        // int shuffleMoves = 500;
         Random rand = new Random();
 
         // Gå igenom alla drag
-        for (int i = 0; i < shuffleMoves; i++)
+        for (int i = 0; i < shuffMoves; i++)
         {
             // Här tar vi fram alla tänkbara drag vi kan göra
             List<BrickDirection> possibleMoves = getPossibleMoves();

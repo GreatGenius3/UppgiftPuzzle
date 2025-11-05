@@ -12,9 +12,10 @@ public class PuzzleDialog extends JFrame implements ActionListener
     private JPanel progressPanel;
     private JPanel buttonPanel;
     private JButton[] buttons;
-    private int seconds;
-    private int minutes;
     private int emptyIndex;
+
+    private GameTimer gameTimer;
+    private boolean firstMove = true;
 
     private JButton newGameButton;
     private JButton losningButton;
@@ -44,9 +45,6 @@ public class PuzzleDialog extends JFrame implements ActionListener
     // Konstruktor
     PuzzleDialog ()
     {
-        seconds = 0;
-        minutes = 0;
-
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new GridLayout(1, 3));
         this.add(mainPanel);
@@ -86,7 +84,7 @@ public class PuzzleDialog extends JFrame implements ActionListener
         losningButton.addActionListener(this);
         aterstallButton = new JButton("Återställ");
         aterstallButton.setFont(new Font("Arial", Font.BOLD, fontSize));
-        aterstallButton.addActionListener(e -> testRensaKnappar());
+        // aterstallButton.addActionListener(e -> testRensaKnappar());
         // aterstallButton.addActionListener(this);
         installningButton = new JButton("Inställningar");
         installningButton.setFont(new Font("Arial", Font.BOLD, fontSize));
@@ -126,9 +124,36 @@ public class PuzzleDialog extends JFrame implements ActionListener
 
         gamePanel.setBackground(customWhite);
 
-        // Skapa nytt spel
-        nyttSpel();
+        // Skapa en timer
+        gameTimer = new GameTimer();
+        // Sen sätter vi en listener på timern
+        // idet här fallet har vi en eget interface
+        gameTimer.setTimerListener(new GameTimer.TimerListener()
+        {
+            @Override
+            public void onTimeUpdated(String time)
+            {
+                labelOne.setText("Tid: " + time);
+            }
 
+            @Override
+            public void onTimerStarted()
+            {
+                // Eventuell hantering när timern startar
+            }
+
+            @Override
+            public void onTimerStopped()
+            {
+                // Eventuell hantering när timern stoppas
+            }
+        });
+
+        // Skapa nytt spel
+        // med 500 blandningar
+        nyttSpel(500);
+
+        // Visa fönstret
         setVisible(true);
     }
 
@@ -138,8 +163,16 @@ public class PuzzleDialog extends JFrame implements ActionListener
     {
         // Nu kolla vi om brickan vi trycker på
         // är en bricka vi kan flytta på
-        if (gameLogic.isAdjacent(index, emptyIndex))
+        if (gameLogic.isAdjacent(index))
         {
+            // Starta timer om det är första draget
+            if (firstMove)
+            {
+                gameTimer.start(); // Starta timern
+                gameLogic.startGame(); // Sätt spelet till PLAYING
+                firstMove = false; // Sätt variabeln till false
+            }
+
             // Sätt brickan vi trycker på till tom
             buttons[index].setVisible(false);
             buttons[index].setText("");
@@ -164,26 +197,36 @@ public class PuzzleDialog extends JFrame implements ActionListener
             // Kolla om pusslet är löst
             if (gameLogic.isSolved())
             {
+                // Sätt spelet till klart
+                gameLogic.finishGame();
+                // Stoppa timern
+                gameTimer.stop();
                 JOptionPane.showMessageDialog(this, "Grattis! Du löste pusslet på " +
-                    gameLogic.getMoves() + " drag!");
+                        gameLogic.getMoves() + " drag och " +
+                        gameTimer.getTimeString() + "!");
             }
         }
     }
 
-    public void nyttSpel()
+    public void nyttSpel(int shuffleMoves)
     {
         // Ornda upp antal knappar till spelfältet
         gamePanel.removeAll();
         buttons = null;
         buttons = new JButton[gameLogic.getAmountOfPuzzles()];
 
+        // Återställ timern
+        // och sätt första draget till sant
+        gameTimer.reset();
+        firstMove = true;
+
         // Återställ spelet.
         gameLogic.reset();
 
-        // Blanda nu brickorna
-        // gameLogic.shuffle();
-        gameLogic.shuffleSolveAble();
+        // Blanda med den lösbara blandningsfunktion
+        gameLogic.shuffleSolveAble(shuffleMoves);
 
+        // Gör iordning alla knappar
         for (int i = 0; i < gameLogic.getAmountOfPuzzles(); i++)
         {
             final int index = i;
@@ -219,12 +262,12 @@ public class PuzzleDialog extends JFrame implements ActionListener
         movesLabel.setText(String.valueOf(gameLogic.getMoves()));
     }
 
-    // Här är funktionen som snabbt löser din lösning
-    // samt ger dig det antalet moves som användes
-    // för lösningen
+    // Här är funktionen som snabbt löser ditt pussel
+    // Men det får bli i framtiden om jag lyckas
+    // hitta en alghoritm
     public void solve()
     {
-        gameLogic.solve();
+        // gameLogic.solve(1);
     }
 
     // Funktion som tar emot en ActionEvent
@@ -234,18 +277,11 @@ public class PuzzleDialog extends JFrame implements ActionListener
         // Nytt spel knappen
         if (e.getSource() == newGameButton)
         {
-            nyttSpel();
+            nyttSpel(500);
         }
         else if (e.getSource() == losningButton)
         {
-            solve();
+            nyttSpel(1);
         }
-    }
-
-    public void testRensaKnappar()
-    {
-        gamePanel.removeAll();
-        buttons = null;
-        gamePanel.repaint();
     }
 }
