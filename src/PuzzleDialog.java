@@ -119,11 +119,6 @@ public class PuzzleDialog extends JFrame implements ActionListener
         progressPanel.add(labelTwo);
         progressPanel.add(movesLabel);
 
-        // Sätt minsta storlek på fönstret
-        // setMinimumSize(new Dimension(1600, 600));
-
-        // pack();
-
         gamePanel.setBackground(customWhite);
 
         // Skapa en timer
@@ -213,6 +208,8 @@ public class PuzzleDialog extends JFrame implements ActionListener
         }
     }
 
+    // Funktionen för att skapa nytt spel
+    // och blandar brickorna med antalet drag
     public void nyttSpel(int shuffleMoves)
     {
         // Ornda upp antal knappar till spelfältet
@@ -367,6 +364,7 @@ public class PuzzleDialog extends JFrame implements ActionListener
                 targetCol >= 0 && targetCol < gameLogic.getPuzzleCells())
         {
 
+            // Ta fram nuvarande indexet
             int targetIndex = targetRow * gameLogic.getPuzzleCells() + targetCol;
             if (gameLogic.isAdjacent(targetIndex))
             {
