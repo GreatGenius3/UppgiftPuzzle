@@ -3,6 +3,8 @@ import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 
 // Klasen PuzzleDialog är en dialogruta som visar ett pusselspel
 public class PuzzleDialog extends JFrame implements ActionListener
@@ -19,8 +21,8 @@ public class PuzzleDialog extends JFrame implements ActionListener
 
     private JButton newGameButton;
     private JButton losningButton;
-    private JButton aterstallButton;
-    private JButton installningButton;
+    private JButton pausaButton;
+    private JButton avslutaButton;
 
     private JLabel labelOne;
     private JLabel labelTwo;
@@ -82,18 +84,18 @@ public class PuzzleDialog extends JFrame implements ActionListener
         losningButton.setFont(new Font("Arial", Font.BOLD, fontSize));
         // losningButton.addActionListener(e -> gameLogic.solve());
         losningButton.addActionListener(this);
-        aterstallButton = new JButton("Återställ");
-        aterstallButton.setFont(new Font("Arial", Font.BOLD, fontSize));
+        pausaButton = new JButton("Pausa");
+        pausaButton.setFont(new Font("Arial", Font.BOLD, fontSize));
         // aterstallButton.addActionListener(e -> testRensaKnappar());
         // aterstallButton.addActionListener(this);
-        installningButton = new JButton("Inställningar");
-        installningButton.setFont(new Font("Arial", Font.BOLD, fontSize));
-        // installningButton.addActionListener(this);
+        avslutaButton = new JButton("Avsluta");
+        avslutaButton.setFont(new Font("Arial", Font.BOLD, fontSize));
+        avslutaButton.addActionListener(e -> System.exit(0));
 
         buttonPanel.add(newGameButton);
         buttonPanel.add(losningButton);
-        buttonPanel.add(aterstallButton);
-        buttonPanel.add(installningButton);
+        buttonPanel.add(pausaButton);
+        buttonPanel.add(avslutaButton);
 
         labelOne = new JLabel("Tid");
         labelOne.setFont(new Font("Arial", Font.BOLD, fontSize));
@@ -133,7 +135,7 @@ public class PuzzleDialog extends JFrame implements ActionListener
             @Override
             public void onTimeUpdated(String time)
             {
-                labelOne.setText("Tid: " + time);
+                secondsLabel.setText(time);
             }
 
             @Override
@@ -152,6 +154,9 @@ public class PuzzleDialog extends JFrame implements ActionListener
         // Skapa nytt spel
         // med 500 blandningar
         nyttSpel(500);
+
+        setFocusable(true);
+        setupKeyBindings();
 
         // Visa fönstret
         setVisible(true);
@@ -236,18 +241,20 @@ public class PuzzleDialog extends JFrame implements ActionListener
             buttons[i].setHorizontalAlignment(JButton.CENTER);
             buttons[i].setVerticalAlignment(JButton.CENTER);
 
-            // LineBorder newBorder = new LineBorder(Color.black, 4);
-            // buttons[i].setBorder(newBorder);
-
             buttons[i].setBackground(puzzelColor);
             buttons[i].setForeground(customWhite);
             buttons[i].setFocusable(false);
             buttons[i].setBorder(new LineBorder(customBlack));
 
-            // buttons[i].setBorder(new EmptyBorder(10, 10, 10, 10));
-            // buttons[i].setBounds(10, 10, 100, 100);
+            // Vi sätter en ActionListener på knappen
+            // som skickar indexen till brickKnapp
             buttons[i].addActionListener(e -> brickKnapp(index));
             gamePanel.add(buttons[i]);
+
+            if (gameLogic.getPuzzel(i) != 0)
+            {
+                buttons[i].setFocusable(false); // Förhindra att knapparna tar fokus
+            }
         }
         // Sätt sen sista knappen till tom
         buttons[gameLogic.getEmptyIndex()].setText("");
@@ -270,6 +277,12 @@ public class PuzzleDialog extends JFrame implements ActionListener
         // gameLogic.solve(1);
     }
 
+    // Här pausar vi spelet
+    public void pauseGame()
+    {
+
+    }
+
     // Funktion som tar emot en ActionEvent
     // Som tex knapptryck
     public void actionPerformed(ActionEvent e)
@@ -279,9 +292,87 @@ public class PuzzleDialog extends JFrame implements ActionListener
         {
             nyttSpel(500);
         }
+        // Gör en enkel lösning för testandet skull
         else if (e.getSource() == losningButton)
         {
             nyttSpel(1);
+        }
+    }
+
+    // Tangentbordsbindning
+    // Denna lade jag till för att vi ska kunna avända piltangenterna
+    // för att flytta brickorna
+    private void setupKeyBindings()
+    {
+        InputMap inputMap = getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+        ActionMap actionMap = getRootPane().getActionMap();
+
+        // Koppla piltangenter till motsvarande rörelser
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0), "moveUp");
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0), "moveDown");
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, 0), "moveLeft");
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, 0), "moveRight");
+
+        actionMap.put("moveUp", new AbstractAction()
+        {
+            @Override
+            public void actionPerformed(ActionEvent e)
+            {
+                moveInDirection(0, -1); // Upp
+            }
+        });
+
+        actionMap.put("moveDown", new AbstractAction()
+        {
+            @Override
+            public void actionPerformed(ActionEvent e)
+            {
+                moveInDirection(0, 1); // Ner
+            }
+        });
+
+        actionMap.put("moveLeft", new AbstractAction()
+        {
+            @Override
+            public void actionPerformed(ActionEvent e)
+            {
+                moveInDirection(-1, 0); // Vänster
+            }
+        });
+
+        actionMap.put("moveRight", new AbstractAction()
+        {
+            @Override
+            public void actionPerformed(ActionEvent e)
+            {
+                moveInDirection(1, 0); // Höger
+            }
+        });
+    }
+
+    // En funktion som flyttar knappen i vald position
+    // Denna är en förbättrad version av moveTile
+    // för att funka med tangentbords tryckning
+    private void moveInDirection(int dx, int dy)
+    {
+        int emptyIndex = gameLogic.getEmptyIndex();
+        int emptyRow = emptyIndex / gameLogic.getPuzzleCells();
+        int emptyCol = emptyIndex % gameLogic.getPuzzleCells();
+
+        int targetRow = emptyRow - dy; // Notera minus för att kompensera för koordinatsystemet
+        int targetCol = emptyCol - dx;
+
+        // Kontrollera om draget är giltigt
+        if (targetRow >= 0 && targetRow < gameLogic.getPuzzleRow() &&
+                targetCol >= 0 && targetCol < gameLogic.getPuzzleCells())
+        {
+
+            int targetIndex = targetRow * gameLogic.getPuzzleCells() + targetCol;
+            if (gameLogic.isAdjacent(targetIndex))
+            {
+                // Använd samma logik som när man klickar på en bricka
+                brickKnapp(targetIndex);
+            }
         }
     }
 }

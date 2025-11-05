@@ -1,4 +1,9 @@
-void main()
+public class Main
 {
-    PuzzleDialog puzzleDialog = new PuzzleDialog();
+    public static void main(String[] args)
+    {
+        // Din kod här
+        PuzzleDialog dialog = new PuzzleDialog();
+        dialog.setVisible(true);
+    }
 }
