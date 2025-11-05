@@ -18,3 +18,6 @@ Du flyttar brickorna med antingen musen eller pilknapparna på tangentbordet
 2. Klona detta repository:
    ```bash
    git clone https://github.com/GreatGenius3/UppgiftPuzzle.git
+
+## Spelvyn
+![Skärmdump av spelet](ScreenPuzzelOne.png)
