@@ -26,9 +26,8 @@ public class PuzzleDialog extends JFrame implements ActionListener
     private JLabel movesLabel;
     private JLabel secondsLabel;
 
+    // Skapa spellogiken för fårt pusselspel
     GameLogic gameLogic = new GameLogic();
-
-    private GameInt.BrickDirection movingDir;
 
     Color puzzelColor = new Color(125, 0, 0);
     Color customDarkGray = new Color(80, 80, 80);
@@ -79,13 +78,16 @@ public class PuzzleDialog extends JFrame implements ActionListener
         int fontSize = 26;
         newGameButton = new JButton("Nytt Spel");
         newGameButton.setFont(new Font("Arial", Font.BOLD, fontSize));
-        newGameButton.addActionListener(e -> gameLogic.newGame(gameLogic.getPuzzleRow(), gameLogic.getPuzzleCells()));
+        // newGameButton.addActionListener(e -> gameLogic.newGame(gameLogic.getPuzzleRow(), gameLogic.getPuzzleCells()));
+        newGameButton.addActionListener(this);
         losningButton = new JButton("Lösning");
         losningButton.setFont(new Font("Arial", Font.BOLD, fontSize));
-        losningButton.addActionListener(e -> gameLogic.solve());
+        // losningButton.addActionListener(e -> gameLogic.solve());
+        losningButton.addActionListener(this);
         aterstallButton = new JButton("Återställ");
         aterstallButton.setFont(new Font("Arial", Font.BOLD, fontSize));
-        aterstallButton.addActionListener(e -> gameLogic.reset());
+        aterstallButton.addActionListener(e -> testRensaKnappar());
+        // aterstallButton.addActionListener(this);
         installningButton = new JButton("Inställningar");
         installningButton.setFont(new Font("Arial", Font.BOLD, fontSize));
         // installningButton.addActionListener(this);
@@ -124,16 +126,69 @@ public class PuzzleDialog extends JFrame implements ActionListener
 
         gamePanel.setBackground(customWhite);
 
-        movingDir = GameInt.BrickDirection.MOVE_UP;
+        // Skapa nytt spel
+        nyttSpel();
 
+        setVisible(true);
+    }
+
+    // Här är funktionen som anropas när
+    // vi trycker på en bricka
+    public void brickKnapp(int index)
+    {
+        // Nu kolla vi om brickan vi trycker på
+        // är en bricka vi kan flytta på
+        if (gameLogic.isAdjacent(index, emptyIndex))
+        {
+            // Sätt brickan vi trycker på till tom
+            buttons[index].setVisible(false);
+            buttons[index].setText("");
+
+            // Ta fram nya indexen från den rikting vi har rört oss på
+            int getNextIndex = gameLogic.findFromDirection(index);
+
+            // Sätt tom brickan till den vi tryckte på
+            buttons[emptyIndex].setVisible(true);
+            buttons[emptyIndex].setText(String.valueOf(gameLogic.getPuzzel(index)));
+
+            // Uppdatera tom index
+            emptyIndex = index;
+
+            // Byt plats på brickorna
+            gameLogic.switchBricks(index, getNextIndex);
+
+            // Öka dragräknaren
+            gameLogic.incrementMoves();
+            movesLabel.setText(String.valueOf(gameLogic.getMoves()));
+
+            // Kolla om pusslet är löst
+            if (gameLogic.isSolved())
+            {
+                JOptionPane.showMessageDialog(this, "Grattis! Du löste pusslet på " +
+                    gameLogic.getMoves() + " drag!");
+            }
+        }
+    }
+
+    public void nyttSpel()
+    {
         // Ornda upp antal knappar till spelfältet
+        gamePanel.removeAll();
+        buttons = null;
         buttons = new JButton[gameLogic.getAmountOfPuzzles()];
+
+        // Återställ spelet.
+        gameLogic.reset();
+
+        // Blanda nu brickorna
+        // gameLogic.shuffle();
+        gameLogic.shuffleSolveAble();
+
         for (int i = 0; i < gameLogic.getAmountOfPuzzles(); i++)
         {
             final int index = i;
-            // puzzel[i] = i;
             buttons[i] = new JButton();
-            buttons[i].setText(String.valueOf(i + 1));
+            buttons[i].setText(String.valueOf(gameLogic.getPuzzel(i)));
             buttons[i].setFont(new Font("Arial", Font.BOLD, 48));
             buttons[i].setHorizontalAlignment(JButton.CENTER);
             buttons[i].setVerticalAlignment(JButton.CENTER);
@@ -152,79 +207,45 @@ public class PuzzleDialog extends JFrame implements ActionListener
             gamePanel.add(buttons[i]);
         }
         // Sätt sen sista knappen till tom
-        buttons[15].setText("");
-        buttons[15].setVisible(false);
-        emptyIndex = 15;
+        buttons[gameLogic.getEmptyIndex()].setText("");
+        buttons[gameLogic.getEmptyIndex()].setVisible(false);
+        emptyIndex = gameLogic.getEmptyIndex();
 
-        // Blanda nu brickorna
-      //  blandaBrickor();
+        // Denna bevövs för att signalera gamePanel att den behöver
+        // uppdateras (målas om)
+        gamePanel.repaint();
 
-        setVisible(true);
+        // Uppdatera antal drag
+        movesLabel.setText(String.valueOf(gameLogic.getMoves()));
     }
 
-    public boolean isAdjacent(int index, int emptyIndex)
+    // Här är funktionen som snabbt löser din lösning
+    // samt ger dig det antalet moves som användes
+    // för lösningen
+    public void solve()
     {
-        int row1 = index / gameLogic.getPuzzleCells();
-        int col1 = index % gameLogic.getPuzzleCells();
-        int row2 = emptyIndex / gameLogic.getPuzzleCells();
-        int col2 = emptyIndex % gameLogic.getPuzzleCells();
-
-        // Sätt nu variablen movingDir till
-        // den rikning som brickan ska flyttas till
-        if (row1 < row2)
-            movingDir = GameInt.BrickDirection.MOVE_DOWN;
-        else if (row1 > row2)
-            movingDir = GameInt.BrickDirection.MOVE_UP;
-        else if (col1 < col2)
-            movingDir = GameInt.BrickDirection.MOVE_RIGHT;
-        else
-            movingDir = GameInt.BrickDirection.MOVE_LEFT;
-
-        return (Math.abs(row1 - row2) == 1 && col1 == col2) ||
-               (Math.abs(col1 - col2) == 1 && row1 == row2);
-    }
-
-    // Här är funktionen som anropas när
-    // vi trycker på en bricka
-    public void brickKnapp(int index)
-    {
-        // Nu kolla vi om brickan vi trycker på
-        // är en bricka vi kan flytta på
-        if (isAdjacent(index, emptyIndex))
-        {
-            // Sätt brickan vi trycker på till tom
-            buttons[index].setVisible(false);
-            buttons[index].setText("");
-
-            // Sätt tom brickan till den vi tryckte på
-            buttons[emptyIndex].setVisible(true);
-            buttons[emptyIndex].setText(String.valueOf(index + 1));
-
-            // Uppdatera tom index
-            emptyIndex = index;
-
-            // Ta fram nya indexen från den rikting vi har rört oss på
-            int getNextIndex = gameLogic.findFromDirection(index, movingDir);
-            // Byt plats på brickorna
-            gameLogic.switchBricks(index, getNextIndex);
-
-            // Öka dragräknaren
-            gameLogic.incrementMoves();
-            movesLabel.setText(String.valueOf(gameLogic.getMoves()));
-
-            // Kolla om pusslet är löst
-            if (gameLogic.isSolved())
-            {
-                JOptionPane.showMessageDialog(this, "Grattis! Du löste pusslet på " +
-                    gameLogic.getMoves() + " drag!");
-            }
-        }
+        gameLogic.solve();
     }
 
     // Funktion som tar emot en ActionEvent
     // Som tex knapptryck
     public void actionPerformed(ActionEvent e)
     {
+        // Nytt spel knappen
+        if (e.getSource() == newGameButton)
+        {
+            nyttSpel();
+        }
+        else if (e.getSource() == losningButton)
+        {
+            solve();
+        }
+    }
 
+    public void testRensaKnappar()
+    {
+        gamePanel.removeAll();
+        buttons = null;
+        gamePanel.repaint();
     }
 }
