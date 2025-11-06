@@ -70,13 +70,13 @@ public class GameLogic implements GameInt
     public void finishGame() {gameStatus = GameStatus.PLAYING;}
 
     // Funktionen isAdjacent kollar om en bricka på vald index
-    // är en bricka vi kan flytta på
-    public boolean isAdjacent(int index)
+    // är närliggande med den tomma indexen
+    public boolean isNarliggande(int index)
     {
-        int row1 = index / getPuzzleCells();
-        int col1 = index % getPuzzleCells();
-        int row2 = emptyIndex / getPuzzleCells();
-        int col2 = emptyIndex % getPuzzleCells();
+        int row1 = index / getPuzzleCells(); // Ta fram raden som indexet är
+        int col1 = index % getPuzzleCells(); // Ta fram columnen som indexent är
+        int row2 = emptyIndex / getPuzzleCells(); // Ta fram raden som tomma rutan är
+        int col2 = emptyIndex % getPuzzleCells(); // Ta fram columnen som tomma rutan är
 
         // Sätt nu variablen movingDir till
         // den rikning som brickan ska flyttas till
@@ -154,6 +154,7 @@ public class GameLogic implements GameInt
         puzzleCells = cells;
     }
 
+    // Ökar på dina drag
     void incrementMoves()
     {
         moves++;
