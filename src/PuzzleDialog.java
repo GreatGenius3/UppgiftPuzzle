@@ -157,6 +157,59 @@ public class PuzzleDialog extends JFrame implements ActionListener
         setVisible(true);
     }
 
+    // Funktionen för att skapa nytt spel
+    // och blandar brickorna med antalet drag
+    public void nyttSpel(int shuffleMoves)
+    {
+        // Ornda upp antal knappar till spelfältet
+        gamePanel.removeAll();
+        buttons = null;
+        buttons = new JButton[gameLogic.getAmountOfPuzzles()];
+
+        // Återställ timern
+        // och sätt första draget till sant
+        gameTimer.reset();
+        firstMove = true;
+
+        // Återställ spelet.
+        gameLogic.reset();
+
+        // Blanda med den lösbara blandningsfunktion
+        gameLogic.shuffleSolveAble(shuffleMoves);
+
+        // Gör iordning alla knappar
+        for (int i = 0; i < gameLogic.getAmountOfPuzzles(); i++)
+        {
+            final int index = i;
+            buttons[i] = new JButton();
+            buttons[i].setText(String.valueOf(gameLogic.getPuzzel(i)));
+            buttons[i].setFont(new Font("Arial", Font.BOLD, 48));
+            buttons[i].setHorizontalAlignment(JButton.CENTER);
+            buttons[i].setVerticalAlignment(JButton.CENTER);
+
+            buttons[i].setBackground(puzzelColor);
+            buttons[i].setForeground(customWhite);
+            buttons[i].setFocusable(false);
+            buttons[i].setBorder(new LineBorder(customBlack));
+
+            // Vi sätter en ActionListener på knappen
+            // som skickar indexen till brickKnapp
+            buttons[i].addActionListener(e -> brickKnapp(index));
+            gamePanel.add(buttons[i]);
+        }
+        // Sätt sen sista knappen till tom
+        buttons[gameLogic.getEmptyIndex()].setText("");
+        buttons[gameLogic.getEmptyIndex()].setVisible(false);
+        emptyIndex = gameLogic.getEmptyIndex();
+
+        // Denna bevövs för att signalera gamePanel att den behöver
+        // uppdateras (målas om)
+        gamePanel.repaint();
+
+        // Uppdatera antal drag
+        movesLabel.setText(String.valueOf(gameLogic.getMoves()));
+    }
+
     // Här är funktionen som anropas när
     // vi trycker på en bricka
     public void brickKnapp(int index)
@@ -208,70 +261,12 @@ public class PuzzleDialog extends JFrame implements ActionListener
         }
     }
 
-    // Funktionen för att skapa nytt spel
-    // och blandar brickorna med antalet drag
-    public void nyttSpel(int shuffleMoves)
-    {
-        // Ornda upp antal knappar till spelfältet
-        gamePanel.removeAll();
-        buttons = null;
-        buttons = new JButton[gameLogic.getAmountOfPuzzles()];
-
-        // Återställ timern
-        // och sätt första draget till sant
-        gameTimer.reset();
-        firstMove = true;
-
-        // Återställ spelet.
-        gameLogic.reset();
-
-        // Blanda med den lösbara blandningsfunktion
-        gameLogic.shuffleSolveAble(shuffleMoves);
-
-        // Gör iordning alla knappar
-        for (int i = 0; i < gameLogic.getAmountOfPuzzles(); i++)
-        {
-            final int index = i;
-            buttons[i] = new JButton();
-            buttons[i].setText(String.valueOf(gameLogic.getPuzzel(i)));
-            buttons[i].setFont(new Font("Arial", Font.BOLD, 48));
-            buttons[i].setHorizontalAlignment(JButton.CENTER);
-            buttons[i].setVerticalAlignment(JButton.CENTER);
-
-            buttons[i].setBackground(puzzelColor);
-            buttons[i].setForeground(customWhite);
-            buttons[i].setFocusable(false);
-            buttons[i].setBorder(new LineBorder(customBlack));
-
-            // Vi sätter en ActionListener på knappen
-            // som skickar indexen till brickKnapp
-            buttons[i].addActionListener(e -> brickKnapp(index));
-            gamePanel.add(buttons[i]);
-
-            if (gameLogic.getPuzzel(i) != 0)
-            {
-                buttons[i].setFocusable(false); // Förhindra att knapparna tar fokus
-            }
-        }
-        // Sätt sen sista knappen till tom
-        buttons[gameLogic.getEmptyIndex()].setText("");
-        buttons[gameLogic.getEmptyIndex()].setVisible(false);
-        emptyIndex = gameLogic.getEmptyIndex();
-
-        // Denna bevövs för att signalera gamePanel att den behöver
-        // uppdateras (målas om)
-        gamePanel.repaint();
-
-        // Uppdatera antal drag
-        movesLabel.setText(String.valueOf(gameLogic.getMoves()));
-    }
-
     // Här är funktionen som snabbt löser ditt pussel
     // Men det får bli i framtiden om jag lyckas
     // hitta en alghoritm
     public void solve()
     {
-        // gameLogic.solve(1);
+        // TODO
     }
 
     // Här pausar vi spelet
