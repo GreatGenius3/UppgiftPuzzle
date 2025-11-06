@@ -1,3 +1,4 @@
+// Game interface
 public interface GameInt
 {
     enum GameStatus { PAUSED, PLAYING, SOLVED }
