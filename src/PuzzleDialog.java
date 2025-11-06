@@ -47,11 +47,12 @@ public class PuzzleDialog extends JFrame implements ActionListener
     // Konstruktor
     PuzzleDialog ()
     {
+        // Först förbered alla paneler
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new GridLayout(1, 3));
         this.add(mainPanel);
 
-        setTitle("Game Dialog");
+        setTitle("Puzzle Game");
         setSize(1600, 600);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -78,16 +79,13 @@ public class PuzzleDialog extends JFrame implements ActionListener
         int fontSize = 26;
         newGameButton = new JButton("Nytt Spel");
         newGameButton.setFont(new Font("Arial", Font.BOLD, fontSize));
-        // newGameButton.addActionListener(e -> gameLogic.newGame(gameLogic.getPuzzleRow(), gameLogic.getPuzzleCells()));
         newGameButton.addActionListener(this);
         losningButton = new JButton("Lösning");
         losningButton.setFont(new Font("Arial", Font.BOLD, fontSize));
-        // losningButton.addActionListener(e -> gameLogic.solve());
         losningButton.addActionListener(this);
         pausaButton = new JButton("Pausa");
         pausaButton.setFont(new Font("Arial", Font.BOLD, fontSize));
-        // aterstallButton.addActionListener(e -> testRensaKnappar());
-        // aterstallButton.addActionListener(this);
+        pausaButton.addActionListener(this);
         avslutaButton = new JButton("Avsluta");
         avslutaButton.setFont(new Font("Arial", Font.BOLD, fontSize));
         avslutaButton.addActionListener(e -> System.exit(0));
@@ -136,13 +134,13 @@ public class PuzzleDialog extends JFrame implements ActionListener
             @Override
             public void onTimerStarted()
             {
-                // Eventuell hantering när timern startar
+                // Inget att lägga in men måste finnas
             }
 
             @Override
             public void onTimerStopped()
             {
-                // Eventuell hantering när timern stoppas
+                // Inget att lägga in men måste finnas
             }
         });
 
@@ -153,7 +151,7 @@ public class PuzzleDialog extends JFrame implements ActionListener
         // Sätter detta fönster till fokus
         setFocusable(true);
         // Därefter gör vi iordning tangentbordsbindningen
-        setupKeyBindings();
+        ordnaTangentbordKnappar();
 
         // Visa fönstret
         setVisible(true);
@@ -165,7 +163,7 @@ public class PuzzleDialog extends JFrame implements ActionListener
     {
         // Nu kolla vi om brickan vi trycker på
         // är en bricka vi kan flytta på
-        if (gameLogic.isAdjacent(index))
+        if (gameLogic.isNarliggande(index))
         {
             // Starta timer om det är första draget
             if (firstMove)
@@ -279,7 +277,7 @@ public class PuzzleDialog extends JFrame implements ActionListener
     // Här pausar vi spelet
     public void pauseGame()
     {
-
+        // TODO
     }
 
     // Funktion som tar emot en ActionEvent
@@ -296,12 +294,17 @@ public class PuzzleDialog extends JFrame implements ActionListener
         {
             nyttSpel(1);
         }
+        // Pausa knappen
+        else if (e.getSource() == pausaButton)
+        {
+            pauseGame();
+        }
     }
 
     // Tangentbordsbindning
     // Denna lade jag till för att vi ska kunna avända piltangenterna
     // för att flytta brickorna
-    private void setupKeyBindings()
+    private void ordnaTangentbordKnappar()
     {
         InputMap inputMap = getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
         ActionMap actionMap = getRootPane().getActionMap();
@@ -317,7 +320,7 @@ public class PuzzleDialog extends JFrame implements ActionListener
             @Override
             public void actionPerformed(ActionEvent e)
             {
-                moveInDirection(0, -1); // Upp
+                flyttaTill(0, -1); // Upp
             }
         });
 
@@ -326,7 +329,7 @@ public class PuzzleDialog extends JFrame implements ActionListener
             @Override
             public void actionPerformed(ActionEvent e)
             {
-                moveInDirection(0, 1); // Ner
+                flyttaTill(0, 1); // Ner
             }
         });
 
@@ -335,7 +338,7 @@ public class PuzzleDialog extends JFrame implements ActionListener
             @Override
             public void actionPerformed(ActionEvent e)
             {
-                moveInDirection(-1, 0); // Vänster
+                flyttaTill(-1, 0); // Vänster
             }
         });
 
@@ -344,7 +347,7 @@ public class PuzzleDialog extends JFrame implements ActionListener
             @Override
             public void actionPerformed(ActionEvent e)
             {
-                moveInDirection(1, 0); // Höger
+                flyttaTill(1, 0); // Höger
             }
         });
     }
@@ -352,11 +355,11 @@ public class PuzzleDialog extends JFrame implements ActionListener
     // En funktion som flyttar knappen i vald position
     // Denna är en förbättrad version av moveTile
     // för att funka med tangentbords tryckning
-    private void moveInDirection(int dx, int dy)
+    private void flyttaTill(int dx, int dy)
     {
-        int emptyIndex = gameLogic.getEmptyIndex();
-        int emptyRow = emptyIndex / gameLogic.getPuzzleCells();
-        int emptyCol = emptyIndex % gameLogic.getPuzzleCells();
+        int emptyIndex = gameLogic.getEmptyIndex(); // Ta fram den tomma rutan
+        int emptyRow = emptyIndex / gameLogic.getPuzzleCells(); // Ta fram aktuella raden där indexet är
+        int emptyCol = emptyIndex % gameLogic.getPuzzleCells(); // Ta fram aktuella columnen där indexen är
 
         int targetRow = emptyRow - dy; // Notera minus för att kompensera för koordinatsystemet
         int targetCol = emptyCol - dx;
@@ -365,14 +368,10 @@ public class PuzzleDialog extends JFrame implements ActionListener
         if (targetRow >= 0 && targetRow < gameLogic.getPuzzleRow() &&
                 targetCol >= 0 && targetCol < gameLogic.getPuzzleCells())
         {
-
             // Ta fram nuvarande indexet
             int targetIndex = targetRow * gameLogic.getPuzzleCells() + targetCol;
-            if (gameLogic.isAdjacent(targetIndex))
-            {
-                // Använd samma logik som när man klickar på en bricka
-                brickKnapp(targetIndex);
-            }
+            // Kör brickKnapp funktionen med vald index
+            brickKnapp(targetIndex);
         }
     }
 }

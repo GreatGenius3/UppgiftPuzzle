@@ -1,5 +1,6 @@
 public class Main
 {
+    // Huvudprogrammet
     public static void main(String[] args)
     {
         // Din kod här
