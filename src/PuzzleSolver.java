@@ -1,3 +1,37 @@
+/// <summary>
+/// Klassen PuzzleSolver är en klass där vi löser vårat spel
+/// med algoritmen A* (A-star) och är en advancerad sökmetod som
+/// hittar den kortaste lösningen.
+///
+/// Den innefattar förljande
+///
+/// 1. Kostnaden hittils (antal drag gjorda)
+/// 2. En heuristik (Manhattan-avstånd)
+///
+/// Viktiga egenskaper hos A*:
+///
+/// 1. Optimal: Hittar alltid den kortaste lösningen
+/// 2. Effektiv: Använder heuristik för att fokusera på lovande vägar
+/// 3. Komplett: Hittar alltid en lösning om en finns
+///
+/// I Början provade vid en metod som kallas BFS (Breadth-First Search)
+/// men den var inte optimal och tog för lång tid att lösa.
+/// BFS innefattar förljande:
+///
+/// 1. BFS söker bredden först och hittar den kortaste lösningen
+/// 2. Den är en bredare sökmetod än A* och tar mycket tid att lösa
+/// så därför blev A* bättre att använda i detta fall
+///
+/// Heuristik (Manhattan-avstånd)
+///
+/// 1. Beräknar summan av avståndet varje bricka har till sin rätta plats
+/// 2. Ger en uppskattning av hur långt kvar det är till målet
+///
+/// Så sammanfattningsvis är A* en mycket bättre metod än BFS för spelet
+///
+/// </summary>
+
+
 import java.util.*;
 
 public class PuzzleSolver
@@ -8,14 +42,16 @@ public class PuzzleSolver
     public enum BrickDir { MOVE_UP, MOVE_DOWN, MOVE_LEFT, MOVE_RIGHT }
 
     // Representerar ett tillstånd i pusslet med prioritet för A* //
-    public static class Node implements Comparable<Node> {
+    public static class Node implements Comparable<Node>
+    {
         int[] state;
         List<BrickDir> path;
         int emptyIndex;
         int cost;  // Kostnad hittills (längden på path)
         int priority;  // Prioritet för A*: cost + heuristik
 
-        Node(int[] state, List<BrickDir> path, int emptyIndex, int cost, int priority) {
+        Node(int[] state, List<BrickDir> path, int emptyIndex, int cost, int priority)
+        {
             this.state = state.clone();
             this.path = new ArrayList<>(path);
             this.emptyIndex = emptyIndex;
@@ -29,7 +65,8 @@ public class PuzzleSolver
         }
 
         @Override
-        public boolean equals(Object obj) {
+        public boolean equals(Object obj)
+        {
             if (this == obj) return true;
             if (obj == null || getClass() != obj.getClass()) return false;
             Node node = (Node) obj;
@@ -43,16 +80,19 @@ public class PuzzleSolver
     }
 
     // Konverterar en lista till en array för effektivare jämförelser
-    public static int[] toArray(List<Integer> list) {
+    public static int[] toArray(List<Integer> list)
+    {
         int[] arr = new int[list.size()];
-        for (int i = 0; i < arr.length; i++) {
+        for (int i = 0; i < arr.length; i++)
+        {
             arr[i] = list.get(i);
         }
         return arr;
     }
 
     // Beräknar Manhattan-avståndet för en bricka
-    public static int calculateManhattanDistance(int index, int value, int size) {
+    public static int calculateManhattanDistance(int index, int value, int size)
+    {
         if (value == 0) return 0;  // Tom ruta
         int targetRow = (value - 1) / size;
         int targetCol = (value - 1) % size;
@@ -62,18 +102,23 @@ public class PuzzleSolver
     }
 
     // Beräknar det totala Manhattan-avståndet för ett tillstånd
-    public static int calculateTotalManhattanDistance(int[] state, int size) {
+    public static int calculateTotalManhattanDistance(int[] state, int size)
+    {
         int total = 0;
-        for (int i = 0; i < state.length; i++) {
+        for (int i = 0; i < state.length; i++)
+        {
             total += calculateManhattanDistance(i, state[i], size);
         }
         return total;
     }
 
     // Kontrollerar om pusslet är löst
-    public static boolean isSolved(int[] state) {
-        for (int i = 0; i < state.length - 1; i++) {
-            if (state[i] != i + 1) {
+    public static boolean isSolved(int[] state)
+    {
+        for (int i = 0; i < state.length - 1; i++)
+        {
+            if (state[i] != i + 1)
+            {
                 return false;
             }
         }
@@ -91,12 +136,14 @@ public class PuzzleSolver
     }
 
     // Hjälpmetod för att kontrollera om en position är giltig
-    public static boolean isValid(int row, int col, int size) {
+    public static boolean isValid(int row, int col, int size)
+    {
         return row >= 0 && row < size && col >= 0 && col < size;
     }
 
     // Löser pusslet med A* algoritm
-    public static List<BrickDir> solvePuzzle(List<Integer> initialPuzzle, int emptyIndex, int puzzleSize) {
+    public static List<BrickDir> solvePuzzle(List<Integer> initialPuzzle, int emptyIndex, int puzzleSize)
+    {
         // Konvertera till array för effektivare jämförelser
         int[] initialState = toArray(initialPuzzle);
 
@@ -118,12 +165,14 @@ public class PuzzleSolver
 
         openSet.add(startNode);
 
-        while (!openSet.isEmpty()) {
+        while (!openSet.isEmpty())
+        {
             // Hämta noden med lägst prioritet
             Node current = openSet.poll();
 
             // Om pusslet är löst, returnera vägen hit
-            if (isSolved(current.state)) {
+            if (isSolved(current.state))
+            {
                 return current.path;
             }
 
@@ -135,12 +184,14 @@ public class PuzzleSolver
             int emptyCol = current.emptyIndex % puzzleSize;
 
             // Testa alla fyra möjliga drag
-            for (int i = 0; i < 4; i++) {
+            for (int i = 0; i < 4; i++)
+            {
                 int newRow = emptyRow + ROW_OFFSETS[i];
                 int newCol = emptyCol + COL_OFFSETS[i];
 
                 // Kontrollera om det nya draget är giltigt
-                if (isValid(newRow, newCol, puzzleSize)) {
+                if (isValid(newRow, newCol, puzzleSize))
+                {
                     // Skapa en kopia av det nuvarande tillståndet
                     int[] newState = current.state.clone();
                     int newEmptyIndex = positionToIndex(newRow, newCol, puzzleSize);
@@ -171,7 +222,8 @@ public class PuzzleSolver
 
                     // Kontrollera om detta tillstånd redan har besökts
                     String stateString = Arrays.toString(newState);
-                    if (!closedSet.contains(stateString)) {
+                    if (!closedSet.contains(stateString))
+                    {
                         openSet.add(neighbor);
                     }
                 }

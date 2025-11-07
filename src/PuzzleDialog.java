@@ -274,8 +274,9 @@ public class PuzzleDialog extends JFrame implements ActionListener
     }
 
     // Här är funktionen som snabbt löser ditt pussel
-    // Men det får bli i framtiden om jag lyckas
-    // hitta en alghoritm
+    // Den använder en A* algoritm och beräknar
+    // ut en lösning och meddelar hur många
+    // steg det tar att lösa pusslet
     public void solve()
     {
         // Använd vår nya lösningsmetod
@@ -288,7 +289,9 @@ public class PuzzleDialog extends JFrame implements ActionListener
         // TODO
     }
 
-    // Metod för att lösa pusslet med AI
+    // Metod för att lösa pusslet med algoritmen A (A-star)
+    // Detta kan ta lit tid beroende på hur
+    // komplex det är
     private void solvePuzzle()
     {
         // Visa en dialogruta medan lösningen beräknas
