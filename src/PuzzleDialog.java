@@ -3,8 +3,11 @@ import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.util.List;
+import javax.swing.SwingWorker;
+import javax.swing.Timer;
+
 
 // Klasen PuzzleDialog är en dialogruta som visar ett pusselspel
 public class PuzzleDialog extends JFrame implements ActionListener
@@ -23,6 +26,7 @@ public class PuzzleDialog extends JFrame implements ActionListener
     private JButton losningButton;
     private JButton pausaButton;
     private JButton avslutaButton;
+    private JButton solveButton;
 
     private JLabel labelOne;
     private JLabel labelTwo;
@@ -80,18 +84,26 @@ public class PuzzleDialog extends JFrame implements ActionListener
         newGameButton = new JButton("Nytt Spel");
         newGameButton.setFont(new Font("Arial", Font.BOLD, fontSize));
         newGameButton.addActionListener(this);
+
         losningButton = new JButton("Lösning");
         losningButton.setFont(new Font("Arial", Font.BOLD, fontSize));
         losningButton.addActionListener(this);
+
+        solveButton = new JButton("Solve");
+        solveButton.setFont(new Font("Arial", Font.BOLD, fontSize));
+        solveButton.addActionListener(this);
+
         pausaButton = new JButton("Pausa");
         pausaButton.setFont(new Font("Arial", Font.BOLD, fontSize));
         pausaButton.addActionListener(this);
+
         avslutaButton = new JButton("Avsluta");
         avslutaButton.setFont(new Font("Arial", Font.BOLD, fontSize));
         avslutaButton.addActionListener(e -> System.exit(0));
 
         buttonPanel.add(newGameButton);
         buttonPanel.add(losningButton);
+        buttonPanel.add(solveButton);
         buttonPanel.add(pausaButton);
         buttonPanel.add(avslutaButton);
 
@@ -145,8 +157,8 @@ public class PuzzleDialog extends JFrame implements ActionListener
         });
 
         // Skapa nytt spel
-        // med 500 blandningar
-        nyttSpel(500);
+        // med 50 blandningar
+        nyttSpel(100);
 
         // Sätter detta fönster till fokus
         setFocusable(true);
@@ -266,13 +278,147 @@ public class PuzzleDialog extends JFrame implements ActionListener
     // hitta en alghoritm
     public void solve()
     {
-        // TODO
+        // Använd vår nya lösningsmetod
+        solvePuzzle();
     }
 
     // Här pausar vi spelet
     public void pauseGame()
     {
         // TODO
+    }
+
+    // Metod för att lösa pusslet med AI
+    private void solvePuzzle()
+    {
+        // Visa en dialogruta medan lösningen beräknas
+        JOptionPane.showMessageDialog(this,
+                "Lösning påbörjad. Detta kan ta en stund...",
+                "Löser pusslet",
+                JOptionPane.INFORMATION_MESSAGE);
+
+        // Skapa en SwingWorker för att köra lösningen i bakgrunden
+        SwingWorker<Void, Void> worker = new SwingWorker<>()
+        {
+            private List<PuzzleSolver.BrickDir> solution;
+
+            @Override
+            protected Void doInBackground() throws Exception {
+                // Hämta nuvarande tillstånd och tomma rutan
+                List<Integer> currentPuzzle = gameLogic.getPuzzel();
+                int emptyIndex = gameLogic.getEmptyIndex();
+                int puzzleSize = gameLogic.getPuzzleRow();
+
+                // Hitta lösningen i bakgrundstråden
+                solution = PuzzleSolver.solvePuzzle(currentPuzzle, emptyIndex, puzzleSize);
+                return null;
+            }
+
+            @Override
+            protected void done()
+            {
+                try
+                {
+                    // Detta körs på EDT när doInBackground är klar
+                    if (solution == null || solution.isEmpty())
+                    {
+                        JOptionPane.showMessageDialog(PuzzleDialog.this,
+                                "Kunde inte hitta en lösning på pusslet.",
+                                "Ingen lösning hittad",
+                                JOptionPane.WARNING_MESSAGE);
+                        return;
+                    }
+
+                    JOptionPane.showMessageDialog(PuzzleDialog.this,
+                            "Lösning hittad! Antal drag: " + solution.size(),
+                            "Lösning hittad",
+                            JOptionPane.INFORMATION_MESSAGE);
+
+                    // Använd en Timer för att köra dragen med fördröjning
+                    Timer timer = new Timer(500, new ActionListener()
+                    {
+                        private int moveIndex = 0;
+
+                        @Override
+                        public void actionPerformed(ActionEvent e)
+                        {
+                            if (moveIndex < solution.size())
+                            {
+                                PuzzleSolver.BrickDir direction = solution.get(moveIndex);
+                                // Hitta indexet för brickan som ska flyttas
+                                int emptyInd = gameLogic.getEmptyIndex();
+                                int[] emptyPos = PuzzleSolver.indexToPosition(emptyInd, gameLogic.getPuzzleRow());
+                                int row = emptyPos[0];
+                                int col = emptyPos[1];
+
+                                // Beräkna positionen för brickan som ska flyttas
+                                switch (direction)
+                                {
+                                    case MOVE_UP: row--; break;
+                                    case MOVE_DOWN: row++; break;
+                                    case MOVE_LEFT: col--; break;
+                                    case MOVE_RIGHT: col++; break;
+                                }
+
+                                // Hitta indexet för brickan
+                                int brickIndex = row * gameLogic.getPuzzleRow() + col;
+
+                                // Flytta brickan
+                                if (gameLogic.isNarliggande(brickIndex))
+                                {
+                                    gameLogic.switchBricks(brickIndex, emptyInd);
+                                    updateBoard();
+                                }
+
+                                moveIndex++;
+                            }
+                            else
+                            {
+                                // Stoppa timern när alla drag är klara
+                                ((Timer) e.getSource()).stop();
+                            }
+                        }
+                    });
+
+                    timer.setInitialDelay(0); // Starta direkt
+                    timer.start();
+
+                }
+                catch (Exception ex)
+                {
+                    ex.printStackTrace();
+                    JOptionPane.showMessageDialog(PuzzleDialog.this,
+                            "Ett fel uppstod: " + ex.getMessage(),
+                            "Fel",
+                            JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        };
+
+        // Starta arbetstråden
+        worker.execute();
+    }
+
+    // Uppdatera spelplanen
+    private void updateBoard()
+    {
+        for (int i = 0; i < gameLogic.getAmountOfPuzzles(); i++)
+        {
+            int value = gameLogic.getPuzzel(i);
+            if (value == 0)
+            {
+                buttons[i].setText("");
+                buttons[i].setVisible(false);
+                emptyIndex = i;
+            }
+            else
+            {
+                buttons[i].setText(String.valueOf(value));
+                buttons[i].setVisible(true);
+            }
+        }
+        movesLabel.setText(String.valueOf(gameLogic.getMoves()));
+        gamePanel.repaint();
     }
 
     // Funktion som tar emot en ActionEvent
@@ -288,6 +434,12 @@ public class PuzzleDialog extends JFrame implements ActionListener
         else if (e.getSource() == losningButton)
         {
             nyttSpel(1);
+        }
+
+        // Testa solve button
+        else if (e.getSource() == solveButton)
+        {
+            solvePuzzle();
         }
         // Pausa knappen
         else if (e.getSource() == pausaButton)
