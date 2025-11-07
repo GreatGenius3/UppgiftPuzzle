@@ -72,6 +72,16 @@ public class GameTimer
         }
     }
 
+    public void pause()
+    {
+        timer.stop();
+    }
+
+    public void resume()
+    {
+        timer.start();
+    }
+
     // Återställ timern
     public void reset()
     {

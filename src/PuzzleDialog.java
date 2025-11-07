@@ -16,6 +16,10 @@ public class PuzzleDialog extends JFrame implements ActionListener
     private JButton[] buttons;
     private int emptyIndex;
 
+    // private JPanel gameContainer;
+    // private JPanel pausePanel;
+    // private JLayeredPane layeredPane;
+
     private GameTimer gameTimer;
     private boolean firstMove = true;
 
@@ -28,6 +32,9 @@ public class PuzzleDialog extends JFrame implements ActionListener
     private JLabel labelTwo;
     private JLabel movesLabel;
     private JLabel secondsLabel;
+
+    private boolean isPaused = false;
+    private JLabel pauseLabel;
 
     // Skapa spellogiken för fårt pusselspel
     GameLogic gameLogic = new GameLogic();
@@ -111,6 +118,13 @@ public class PuzzleDialog extends JFrame implements ActionListener
         secondsLabel.setFont(new Font("Arial", Font.BOLD, fontSize));
         secondsLabel.setHorizontalAlignment(JLabel.CENTER);
         secondsLabel.setVerticalAlignment(JLabel.CENTER);
+
+        // Paus texten
+        pauseLabel = new JLabel("PAUSAD", JLabel.CENTER);
+        pauseLabel.setFont(new Font("Arial", Font.BOLD, 72));
+        pauseLabel.setForeground(Color.RED);
+        pauseLabel.setVisible(false);  // Initially hidden
+        gamePanel.add(pauseLabel, BorderLayout.CENTER);
 
         progressPanel.add(labelOne);
         progressPanel.add(secondsLabel);
@@ -277,7 +291,32 @@ public class PuzzleDialog extends JFrame implements ActionListener
     // Här pausar vi spelet
     public void pauseGame()
     {
-        // TODO
+        if (gameLogic.isGamePlaying())
+        {  // Only allow pausing if game is in progress
+            isPaused = !isPaused;  // Toggle pause state
+
+            if (isPaused)
+            {
+                gameTimer.pause();
+                pauseLabel.setVisible(true);
+                pausaButton.setText("Fortsätt");
+            }
+            else
+            {
+                gameTimer.resume();
+                pauseLabel.setVisible(false);
+                pausaButton.setText("Pausa");
+            }
+
+            // Disable all puzzle buttons when paused
+            for (JButton button : buttons)
+            {
+                if (button != null)
+                {
+                    button.setEnabled(!isPaused);
+                }
+            }
+        }
     }
 
     // Funktion som tar emot en ActionEvent
@@ -375,3 +414,68 @@ public class PuzzleDialog extends JFrame implements ActionListener
         }
     }
 }
+
+// RESERV KOD
+/*
+
+// NY KOD HÄR
+        // Skapa en container-panel med CardLayout
+        /*
+        gameContainer = new JPanel(new CardLayout());
+        gameContainer.add(gamePanel, "game");
+
+        // Lägg till pausetexten i en separat panel
+        JPanel pausePanel = new JPanel(new BorderLayout());
+        pausePanel.setOpaque(false);  // Gör den genomskinlig
+        pauseLabel = new JLabel("PAUSAD", JLabel.CENTER);
+        pauseLabel.setFont(new Font("Arial", Font.BOLD, 72));
+        pauseLabel.setForeground(Color.RED);
+        pausePanel.add(pauseLabel, BorderLayout.CENTER);
+        pausePanel.setVisible(false);  // Dölj från början
+
+        // Lägg till båda panelerna i en JLayeredPane
+        layeredPane = new JLayeredPane();
+        layeredPane.setPreferredSize(new Dimension(600, 600));  // Anpassa storleken efter behov
+
+        // Lägg till gamePanel längst ner
+        gamePanel.setBounds(0, 0, 600, 600);
+        layeredPane.add(gamePanel, JLayeredPane.DEFAULT_LAYER);
+
+        // Lägg till pausePanel ovanpå
+        pausePanel.setBounds(0, 0, 600, 600);
+        layeredPane.add(pausePanel, JLayeredPane.PALETTE_LAYER);
+
+        // Använd layeredPane istället för gamePanel i mainPanel
+        mainPanel.add(layeredPane, 0);  // Lägg till som första panel
+
+        // NY KOD SLUT
+
+
+public void pauseGame() {
+    // Pausa endast när spelet är igång
+    if (gameLogic.isGamePlaying()) {
+        isPaused = !isPaused; // Toggle paus
+
+        if (isPaused) {
+            gameTimer.pause();
+            pausePanel.setVisible(true);
+            pausaButton.setText("Fortsätt");
+        } else {
+            gameTimer.resume();
+            pausePanel.setVisible(false);
+            pausaButton.setText("Pausa");
+        }
+
+        // Inaktivera alla pusselknappar när pausad
+        for (JButton button : buttons) {
+            if (button != null) {
+                button.setEnabled(!isPaused);
+            }
+        }
+
+        // Tvinga en uppdatering av gränssnittet
+        revalidate();
+        repaint();
+    }
+}
+*/

@@ -58,6 +58,8 @@ public class GameLogic implements GameInt
     }
 
     public void setGameStatus(GameStatus newstatus) { gameStatus = newstatus; }
+    // Är spelet igång
+    public boolean isGamePlaying() { return gameStatus == GameStatus.PLAYING; }
 
     // --------------------------------------------------------------
     // Metoder
@@ -158,14 +160,6 @@ public class GameLogic implements GameInt
     void incrementMoves()
     {
         moves++;
-    }
-
-    // En metod som löser spelet
-    // Kanske finns en algorithm för detta men
-    // jag kikar på det i framtiden
-    public void solve(int moves)
-    {
-        // IO.println("Tji fick ni! Inget quicklösning på detta! ");
     }
 
     // Kollar om vi har löst detta
