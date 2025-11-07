@@ -243,6 +243,35 @@ public class GameLogic implements GameInt
         moves = 0;
     }
 
+    public int shufflePro(int shuffMoves)
+    {
+        // Återställ till löst läge först
+        reset();
+
+        Random rand = new Random();
+        int movesMade = 0;
+        int maxMoves = shuffMoves;  // Vi vill göra exakt 100 drag
+
+        while (movesMade < maxMoves)
+        {
+            // Hämta alla möjliga drag från nuvarande position
+            List<BrickDirection> possibleMoves = getPossibleMoves();
+
+            if (!possibleMoves.isEmpty())
+            {
+                // Välj ett slumpmässigt drag
+                BrickDirection move = possibleMoves.get(rand.nextInt(possibleMoves.size()));
+                // Utför draget
+                moveTile(move);
+                movesMade++;
+            }
+        }
+
+        // Återställ räknaren eftersom vi bara gjort blandningar
+        moves = 0;
+        return movesMade;  // Bör alltid returnera 100
+    }
+
     // PRIVAT FUNKTION!
     // Funktion som ger dig alla tänkbara drag från den
     // tomma rutan

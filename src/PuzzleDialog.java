@@ -158,7 +158,7 @@ public class PuzzleDialog extends JFrame implements ActionListener
 
         // Skapa nytt spel
         // med 50 blandningar
-        nyttSpel(100);
+        nyttSpel(500);
 
         // Sätter detta fönster till fokus
         setFocusable(true);
@@ -187,7 +187,8 @@ public class PuzzleDialog extends JFrame implements ActionListener
         gameLogic.reset();
 
         // Blanda med den lösbara blandningsfunktion
-        gameLogic.shuffleSolveAble(shuffleMoves);
+        // gameLogic.shuffleSolveAble(shuffleMoves);
+        gameLogic.shufflePro(shuffleMoves);
 
         // Gör iordning alla knappar
         for (int i = 0; i < gameLogic.getAmountOfPuzzles(); i++)
